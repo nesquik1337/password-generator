@@ -10,9 +10,19 @@ import java.util.List;
  */
 public final class DefaultPasswordGenerator implements PasswordGenerator {
 
+    /**
+     * Набор цифр.
+     */
     private static final String DIGITS = "0123456789";
+
+    /**
+     * Набор специальных символов.
+     */
     private static final String SPECIALS = "!@#$%^&*()-_=+[]{};:,.?/\\|";
 
+    /**
+     * Генератор криптографически стойких случайных чисел.
+     */
     private final SecureRandom random;
 
     /**
@@ -245,8 +255,19 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
      * Контейнер пулов символов.
      */
     private static final class Pools {
+        /**
+         * Строчные буквы выбранных алфавитов.
+         */
         private final String lowerLetters;
+
+        /**
+         * Заглавные буквы выбранных алфавитов.
+         */
         private final String upperLetters;
+
+        /**
+         * Все допустимые символы для генерации.
+         */
         private final String all;
 
         /**

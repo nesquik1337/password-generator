@@ -92,16 +92,29 @@ public record PasswordConfig(
      * Поддерживаемые алфавиты.
      */
     public enum Alphabet {
+        /**
+         * Латинский алфавит.
+         */
         LATIN(
                 "abcdefghijklmnopqrstuvwxyz",
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         ),
+        /**
+         * Кириллический алфавит.
+         */
         CYRILLIC(
                 "абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
                 "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
         );
 
+        /**
+         * Строчные буквы алфавита.
+         */
         private final String lower;
+
+        /**
+         * Заглавные буквы алфавита.
+         */
         private final String upper;
 
         /**

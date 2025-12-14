@@ -40,6 +40,7 @@ tasks.test {
 tasks.javadoc {
     (options as StandardJavadocDocletOptions).encoding = "UTF-8"
     (options as StandardJavadocDocletOptions).charSet = "UTF-8"
+    (options as StandardJavadocDocletOptions).addBooleanOption("private", true)
 }
 
 tasks.register<Jar>("fatJar") {

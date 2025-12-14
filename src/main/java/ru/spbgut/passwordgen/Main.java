@@ -12,8 +12,14 @@ import java.util.EnumSet;
  */
 public final class Main {
 
+    /**
+     * Логгер приложения.
+     */
     private static final Logger log = LogManager.getLogger(Main.class);
 
+    /**
+     * Запрещает создание экземпляров класса.
+     */
     private Main() {
     }
 
