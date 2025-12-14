@@ -7,6 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
 
+/**
+ * Точка входа консольного приложения.
+ */
 public final class Main {
 
     private static final Logger log = LogManager.getLogger(Main.class);
@@ -14,6 +17,11 @@ public final class Main {
     private Main() {
     }
 
+    /**
+     * Запускает приложение.
+     *
+     * @param args аргументы командной строки
+     */
     public static void main(String[] args) {
         try {
             if (args.length == 0 || hasFlag(args, "--help")) {
@@ -57,6 +65,12 @@ public final class Main {
         }
     }
 
+    /**
+     * Создаёт конфигурацию из аргументов командной строки.
+     *
+     * @param args аргументы
+     * @return конфигурация
+     */
     private static PasswordConfig parseConfig(String[] args) {
         int length = getIntArg(args, "--length", 16);
         EnumSet<PasswordConfig.Alphabet> alphabets = parseAlphabets(getStringArg(args, "--alphabets", "latin"));
@@ -74,6 +88,12 @@ public final class Main {
         return PasswordConfig.of(length, alphabets, upper, lower, digits, special, requiredDigits);
     }
 
+    /**
+     * Парсит значение параметра --alphabets (например: latin,cyrillic).
+     *
+     * @param value строка алфавитов
+     * @return набор алфавитов
+     */
     private static EnumSet<PasswordConfig.Alphabet> parseAlphabets(String value) {
         EnumSet<PasswordConfig.Alphabet> set = EnumSet.noneOf(PasswordConfig.Alphabet.class);
         if (value == null || value.isBlank()) {
@@ -92,6 +112,12 @@ public final class Main {
         return set;
     }
 
+    /**
+     * Выводит пароль полностью или превью для больших длин.
+     *
+     * @param password пароль
+     * @param length длина пароля
+     */
     private static void printPasswordPreview(String password, int length) {
         if (length <= 2000) {
             System.out.println(password);
@@ -102,6 +128,13 @@ public final class Main {
         System.out.println("Tip: use --out <file> to save full password.");
     }
 
+    /**
+     * Записывает строку в файл.
+     *
+     * @param path путь файла
+     * @param text текст
+     * @throws Exception ошибка записи
+     */
     private static void writeToFile(Path path, String text) throws Exception {
         Path parent = path.toAbsolutePath().getParent();
         if (parent != null) {
@@ -110,6 +143,13 @@ public final class Main {
         Files.writeString(path, text);
     }
 
+    /**
+     * Проверяет наличие флага в args.
+     *
+     * @param args аргументы
+     * @param flag флаг
+     * @return true, если флаг присутствует
+     */
     private static boolean hasFlag(String[] args, String flag) {
         for (String a : args) {
             if (a.equalsIgnoreCase(flag)) return true;
@@ -117,6 +157,14 @@ public final class Main {
         return false;
     }
 
+    /**
+     * Возвращает строковый аргумент вида --key value.
+     *
+     * @param args аргументы
+     * @param key ключ
+     * @param def значение по умолчанию
+     * @return значение
+     */
     private static String getStringArg(String[] args, String key, String def) {
         for (int i = 0; i < args.length - 1; i++) {
             if (args[i].equalsIgnoreCase(key)) return args[i + 1];
@@ -124,6 +172,14 @@ public final class Main {
         return def;
     }
 
+    /**
+     * Возвращает целочисленный аргумент вида --key value.
+     *
+     * @param args аргументы
+     * @param key ключ
+     * @param def значение по умолчанию
+     * @return число
+     */
     private static int getIntArg(String[] args, String key, int def) {
         String s = getStringArg(args, key, null);
         if (s == null) return def;
@@ -134,12 +190,22 @@ public final class Main {
         }
     }
 
+    /**
+     * Возвращает путь из аргумента вида --key value.
+     *
+     * @param args аргументы
+     * @param key ключ
+     * @return путь или null
+     */
     private static Path getPathArg(String[] args, String key) {
         String s = getStringArg(args, key, null);
         if (s == null) return null;
         return Path.of(s);
     }
 
+    /**
+     * Выводит справку по аргументам.
+     */
     private static void printHelp() {
         System.out.println("""
                 Password Generator (console)
@@ -151,11 +217,6 @@ public final class Main {
                   --out <file>
                   --benchmark
                   --help
-
-                Examples:
-                  --length 32 --alphabets latin --upper --lower --digits --special --requiredDigits 135
-                  --benchmark
-                  --length 1000000 --alphabets latin --lower --digits --out big.txt
                 """);
     }
 }

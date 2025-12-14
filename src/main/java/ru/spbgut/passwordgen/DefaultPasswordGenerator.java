@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+/**
+ * Реализация генератора паролей на основе SecureRandom.
+ */
 public final class DefaultPasswordGenerator implements PasswordGenerator {
 
     private static final String DIGITS = "0123456789";
@@ -12,10 +15,19 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
 
     private final SecureRandom random;
 
+    /**
+     * Создаёт генератор с SecureRandom.
+     */
     public DefaultPasswordGenerator() {
         this.random = new SecureRandom();
     }
 
+    /**
+     * Генерирует пароль по конфигурации.
+     *
+     * @param config конфигурация генерации
+     * @return пароль
+     */
     @Override
     public String generate(PasswordConfig config) {
         config.validate();
@@ -35,6 +47,12 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         return new String(result);
     }
 
+    /**
+     * Формирует допустимые наборы символов.
+     *
+     * @param config конфигурация
+     * @return пулы символов
+     */
     private Pools buildPools(PasswordConfig config) {
         String lowerLetters = collectLetters(config.alphabets(), true);
         String upperLetters = collectLetters(config.alphabets(), false);
@@ -55,15 +73,26 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         return new Pools(lowerLetters, upperLetters, all.toString());
     }
 
+    /**
+     * Собирает буквы выбранных алфавитов с использованием StreamAPI.
+     *
+     * @param alphabets алфавиты
+     * @param lower true — строчные, false — заглавные
+     * @return строка букв
+     */
     private String collectLetters(EnumSet<PasswordConfig.Alphabet> alphabets, boolean lower) {
-        if (alphabets.isEmpty()) return "";
-        StringBuilder sb = new StringBuilder();
-        for (PasswordConfig.Alphabet a : alphabets) {
-            sb.append(lower ? a.lower() : a.upper());
-        }
-        return sb.toString();
+        return alphabets.stream()
+                .map(a -> lower ? a.lower() : a.upper())
+                .collect(java.util.stream.Collectors.joining());
     }
 
+    /**
+     * Формирует список обязательных символов, чтобы требования точно выполнялись.
+     *
+     * @param config конфигурация
+     * @param pools пулы символов
+     * @return обязательные символы
+     */
     private List<Character> buildMandatory(PasswordConfig config, Pools pools) {
         List<Character> mandatory = new ArrayList<>();
         addRequiredDigits(mandatory, config.requiredDigits());
@@ -74,6 +103,12 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         return mandatory;
     }
 
+    /**
+     * Добавляет обязательные цифры из requiredDigits.
+     *
+     * @param mandatory список обязательных символов
+     * @param requiredDigits строка цифр
+     */
     private void addRequiredDigits(List<Character> mandatory, String requiredDigits) {
         if (requiredDigits == null || requiredDigits.isEmpty()) return;
         for (char c : requiredDigits.toCharArray()) {
@@ -81,17 +116,36 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         }
     }
 
+    /**
+     * Гарантирует наличие хотя бы одной цифры, если цифры включены.
+     *
+     * @param mandatory список обязательных символов
+     * @param digitsEnabled включены ли цифры
+     */
     private void ensureDigitIfNeeded(List<Character> mandatory, boolean digitsEnabled) {
         if (!digitsEnabled) return;
         if (containsDigit(mandatory)) return;
         mandatory.add(randomChar(DIGITS));
     }
 
+    /**
+     * Гарантирует наличие хотя бы одного спецсимвола, если спецсимволы включены.
+     *
+     * @param mandatory список обязательных символов
+     * @param specialEnabled включены ли спецсимволы
+     */
     private void ensureSpecialIfNeeded(List<Character> mandatory, boolean specialEnabled) {
         if (!specialEnabled) return;
         mandatory.add(randomChar(SPECIALS));
     }
 
+    /**
+     * Гарантирует наличие букв нужных регистров (если включены).
+     *
+     * @param mandatory список обязательных символов
+     * @param config конфигурация
+     * @param pools пулы символов
+     */
     private void ensureCaseLetters(List<Character> mandatory, PasswordConfig config, Pools pools) {
         if (config.lower() && !pools.lowerLetters.isEmpty()) {
             mandatory.add(randomChar(pools.lowerLetters));
@@ -101,6 +155,12 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         }
     }
 
+    /**
+     * Гарантирует наличие хотя бы одной буквы из каждого выбранного алфавита.
+     *
+     * @param mandatory список обязательных символов
+     * @param config конфигурация
+     */
     private void ensureEachAlphabet(List<Character> mandatory, PasswordConfig config) {
         if (config.alphabets().isEmpty()) return;
         if (!config.lower() && !config.upper()) return;
@@ -115,6 +175,13 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         }
     }
 
+    /**
+     * Записывает обязательные символы в начало массива результата.
+     *
+     * @param arr массив результата
+     * @param mandatory обязательные символы
+     * @return индекс, с которого продолжать заполнение
+     */
     private int putMandatory(char[] arr, List<Character> mandatory) {
         int i = 0;
         for (char c : mandatory) {
@@ -123,12 +190,24 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         return i;
     }
 
+    /**
+     * Заполняет оставшиеся позиции случайными символами.
+     *
+     * @param arr массив результата
+     * @param startIndex индекс начала заполнения
+     * @param allowed допустимые символы
+     */
     private void fillRemaining(char[] arr, int startIndex, String allowed) {
         for (int i = startIndex; i < arr.length; i++) {
             arr[i] = randomChar(allowed);
         }
     }
 
+    /**
+     * Перемешивает массив символов (алгоритм Фишера—Йетса).
+     *
+     * @param arr массив результата
+     */
     private void shuffle(char[] arr) {
         for (int i = arr.length - 1; i > 0; i--) {
             int j = random.nextInt(i + 1);
@@ -138,6 +217,12 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         }
     }
 
+    /**
+     * Проверяет, есть ли цифра в списке обязательных символов.
+     *
+     * @param mandatory список обязательных символов
+     * @return true, если есть цифра
+     */
     private boolean containsDigit(List<Character> mandatory) {
         for (Character c : mandatory) {
             if (c != null && c >= '0' && c <= '9') return true;
@@ -145,16 +230,32 @@ public final class DefaultPasswordGenerator implements PasswordGenerator {
         return false;
     }
 
+    /**
+     * Возвращает случайный символ из заданного набора.
+     *
+     * @param pool набор допустимых символов
+     * @return случайный символ
+     */
     private char randomChar(String pool) {
         int i = random.nextInt(pool.length());
         return pool.charAt(i);
     }
 
+    /**
+     * Контейнер пулов символов.
+     */
     private static final class Pools {
         private final String lowerLetters;
         private final String upperLetters;
         private final String all;
 
+        /**
+         * Создаёт пулы символов.
+         *
+         * @param lowerLetters строчные буквы
+         * @param upperLetters заглавные буквы
+         * @param all все допустимые символы
+         */
         private Pools(String lowerLetters, String upperLetters, String all) {
             this.lowerLetters = lowerLetters;
             this.upperLetters = upperLetters;

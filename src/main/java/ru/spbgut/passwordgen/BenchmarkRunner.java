@@ -2,11 +2,20 @@ package ru.spbgut.passwordgen;
 
 import java.util.EnumSet;
 
+/**
+ * Запуск замеров времени генерации паролей.
+ */
 public final class BenchmarkRunner {
 
     private BenchmarkRunner() {
     }
 
+    /**
+     * Запускает бенчмарк и возвращает таблицу результатов.
+     *
+     * @param generator генератор паролей
+     * @return таблица результатов
+     */
     public static String run(PasswordGenerator generator) {
         int[] lengths = {10_000, 100_000, 500_000, 1_000_000};
         Profile[] profiles = {Profile.SIMPLE, Profile.MEDIUM, Profile.HARD};
@@ -27,12 +36,27 @@ public final class BenchmarkRunner {
         return sb.toString();
     }
 
+    /**
+     * Прогрев перед замерами.
+     *
+     * @param generator генератор
+     * @param cfg конфигурация
+     * @param times число прогревочных запусков
+     */
     private static void warmup(PasswordGenerator generator, PasswordConfig cfg, int times) {
         for (int i = 0; i < times; i++) {
             generator.generate(cfg);
         }
     }
 
+    /**
+     * Возвращает среднее время по нескольким запускам.
+     *
+     * @param generator генератор
+     * @param cfg конфигурация
+     * @param repeats число повторов
+     * @return среднее время в миллисекундах
+     */
     private static double measureAvg(PasswordGenerator generator, PasswordConfig cfg, int repeats) {
         double sum = 0.0;
         for (int i = 0; i < repeats; i++) {
@@ -44,11 +68,20 @@ public final class BenchmarkRunner {
         return sum / repeats;
     }
 
+    /**
+     * Уровни сложности для бенчмарка.
+     */
     private enum Profile {
         SIMPLE,
         MEDIUM,
         HARD;
 
+        /**
+         * Создаёт конфигурацию по уровню сложности.
+         *
+         * @param length длина пароля
+         * @return конфигурация
+         */
         private PasswordConfig config(int length) {
             return switch (this) {
                 case SIMPLE -> PasswordConfig.of(

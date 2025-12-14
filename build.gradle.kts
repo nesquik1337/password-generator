@@ -1,5 +1,3 @@
-import org.gradle.external.javadoc.StandardJavadocDocletOptions
-
 plugins {
     java
     application
@@ -21,6 +19,10 @@ repositories {
 dependencies {
     implementation("org.apache.logging.log4j:log4j-api:2.25.2")
     implementation("org.apache.logging.log4j:log4j-core:2.25.2")
+
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 application {
@@ -31,10 +33,13 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
-tasks.named<Javadoc>("javadoc") {
-    val o = options as StandardJavadocDocletOptions
-    o.encoding = "UTF-8"
-    o.charSet = "UTF-8"
+tasks.test {
+    useJUnitPlatform()
+}
+
+tasks.javadoc {
+    (options as StandardJavadocDocletOptions).encoding = "UTF-8"
+    (options as StandardJavadocDocletOptions).charSet = "UTF-8"
 }
 
 tasks.register<Jar>("fatJar") {

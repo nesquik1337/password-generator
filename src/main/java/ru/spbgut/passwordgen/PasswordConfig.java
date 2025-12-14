@@ -4,6 +4,17 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+/**
+ * Конфигурация генерации пароля.
+ *
+ * @param length длина пароля
+ * @param alphabets набор алфавитов
+ * @param upper использовать заглавные буквы
+ * @param lower использовать строчные буквы
+ * @param digits использовать цифры
+ * @param special использовать специальные символы
+ * @param requiredDigits строка цифр, которые должны встретиться в пароле
+ */
 public record PasswordConfig(
         int length,
         EnumSet<Alphabet> alphabets,
@@ -15,6 +26,18 @@ public record PasswordConfig(
 ) {
     private static final Pattern ONLY_DIGITS = Pattern.compile("\\d*");
 
+    /**
+     * Создаёт конфигурацию и выполняет валидацию.
+     *
+     * @param length длина пароля
+     * @param alphabets набор алфавитов
+     * @param upper использовать заглавные буквы
+     * @param lower использовать строчные буквы
+     * @param digits использовать цифры
+     * @param special использовать специальные символы
+     * @param requiredDigits строка обязательных цифр
+     * @return валидная конфигурация
+     */
     public static PasswordConfig of(
             int length,
             EnumSet<Alphabet> alphabets,
@@ -35,6 +58,11 @@ public record PasswordConfig(
         return cfg;
     }
 
+    /**
+     * Проверяет параметры конфигурации.
+     *
+     * @throws IllegalArgumentException если параметры некорректны
+     */
     public void validate() {
         if (length < 1) {
             throw new IllegalArgumentException("Length must be >= 1");
@@ -60,6 +88,9 @@ public record PasswordConfig(
         }
     }
 
+    /**
+     * Поддерживаемые алфавиты.
+     */
     public enum Alphabet {
         LATIN(
                 "abcdefghijklmnopqrstuvwxyz",
@@ -73,15 +104,31 @@ public record PasswordConfig(
         private final String lower;
         private final String upper;
 
+        /**
+         * Создаёт алфавит.
+         *
+         * @param lower строчные буквы
+         * @param upper заглавные буквы
+         */
         Alphabet(String lower, String upper) {
             this.lower = lower;
             this.upper = upper;
         }
 
+        /**
+         * Возвращает строчные буквы алфавита.
+         *
+         * @return строка строчных букв
+         */
         public String lower() {
             return lower;
         }
 
+        /**
+         * Возвращает заглавные буквы алфавита.
+         *
+         * @return строка заглавных букв
+         */
         public String upper() {
             return upper;
         }
